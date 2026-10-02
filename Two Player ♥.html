@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Waiting For YOU ♥</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#14071a;--panel:#241030;--pink:#ff6b9d;--blue:#7cc7ff;--text:#ffe9f1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;overscroll-behavior:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;background:radial-gradient(ellipse at 50% 0%,#3a1245 0%,var(--bg) 65%);color:var(--text);font-family:'Press Start 2P',ui-monospace,Menlo,monospace;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:12px;-webkit-user-select:none;user-select:none}
+#hud{display:flex;gap:18px;font-size:clamp(8px,2vw,11px)}
+#hud .a{color:var(--blue)}#hud .b{color:var(--pink)}#hud .h{color:var(--pink);animation:beat 1.2s infinite}
+#stage{position:relative;width:min(100%,880px,calc((100dvh - 200px)*1.4545));aspect-ratio:640/440;border:4px solid #5b2a52;border-radius:6px;box-shadow:0 0 40px rgba(255,107,157,.25);overflow:hidden;background:#000}
+canvas{width:100%;height:100%;display:block;image-rendering:pixelated;touch-action:none}
+#title{position:absolute;inset:0;background:rgba(20,7,26,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,2.4vw,18px);text-align:center;transition:opacity .6s}
+#title h1{margin:0;font-size:clamp(16px,5vw,38px);color:var(--pink);text-shadow:3px 3px 0 #5b2a52}
+#title p{margin:0;font-size:clamp(8px,2.2vw,14px);line-height:1.8}
+#title .a{color:var(--blue)}#title .b{color:var(--pink)}
+.btn{min-height:44px;font:inherit;font-size:clamp(9px,2.2vw,13px);color:var(--text);background:var(--pink);color:#2a0f2e;border:0;padding:12px 18px;border-radius:4px;cursor:pointer;box-shadow:0 4px 0 #a33a64;animation:blink 1.1s steps(2) infinite}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #a33a64}
+#cap{width:min(100%,880px);min-height:5.2em;background:var(--panel);border:3px solid var(--pink);border-radius:4px;padding:12px 14px;font-size:clamp(9px,2.2vw,12px);line-height:1.9}
+#pad{display:none;grid-template-columns:repeat(3,68px);grid-template-rows:repeat(2,68px);gap:8px;touch-action:none}
+#pad.on{display:grid}
+#pad button{font-size:26px;background:var(--panel);color:var(--pink);border:2px solid var(--pink);border-radius:8px;touch-action:none}
+#pad button:active{background:var(--pink);color:var(--panel)}
+#fin{position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,#5a1b4a,#14071a 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center;padding:24px;opacity:0;pointer-events:none;transition:opacity 2s;z-index:5}
+#fin.on{opacity:1;pointer-events:auto}
+#fin .msg{white-space:pre-line;max-width:560px;font-size:clamp(11px,3vw,18px);line-height:2.2;color:var(--text);min-height:12em}
+#fin .big{font-size:clamp(40px,10vw,72px);animation:beat 1.2s infinite;filter:drop-shadow(0 0 18px var(--pink))}
+#fin .btn{animation:none;opacity:.0;transition:opacity 1.5s;background:transparent;color:var(--pink);border:2px solid var(--pink);box-shadow:none}
+#fin.done .btn{opacity:.85}
+.fh{position:absolute;bottom:-40px;color:var(--pink);opacity:.5;animation:rise linear infinite;pointer-events:none}
+@keyframes rise{to{transform:translateY(-115vh) rotate(25deg);opacity:0}}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes blink{50%{opacity:.6}}
+@media (hover:hover) and (pointer:fine){#pad.on{display:none}}
+@media (max-width:600px){body{padding:8px;gap:10px}#cap{min-height:7em;padding:10px}#stage{border-width:3px}}
+@media (orientation:landscape) and (max-height:520px){#hud{display:none}body{gap:6px;padding:6px}#stage{width:min(100%,880px,calc((100dvh - 80px)*1.4545))}#cap{min-height:3.8em;padding:6px 10px;font-size:9px}#pad.on{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:12px;opacity:.8;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(2,52px)}}
+</style>
+</head>
+<body>
+<div id="hud"><span class="a">P1 · <span id="n1"></span></span><span class="h">♥</span><span class="b">P2 · <span id="n2"></span></span></div>
+<div id="stage">
+  <canvas id="c" width="640" height="440"></canvas>
+  <div id="title">
+    <h1>WAITING</h1>
+    <div><p class="a">PLAYER 1: <span class="n1"></span></p><p class="b">PLAYER 2: <span class="n2"></span></p></div>
+    <p style="opacity:.7">Tissss is waiting at the gate.</p><p style="opacity:.7">Arrow keys · swipe · or tap the pad</p>
+    <button class="btn" id="start">PRESS START</button>
+  </div>
+</div>
+<div id="cap">&nbsp;</div>
+<div id="pad"><span></span><button data-d="u">▲</button><span></span><button data-d="l">◀</button><button data-d="d">▼</button><button data-d="r">▶</button></div>
+
+<div id="fin"><div class="big">❤️</div><div class="msg" id="msg"></div><button class="btn" onclick="location.reload()">PLAY AGAIN</button></div>
+
+<script>
+// ---- Make it yours ----
+const CONFIG={
+  p1:"TISSSS", p2:"SAF",
+  final:"In every level, in every world,\nit was always you I was looking for.\n\nYou're my favorite person, my safe place, my home.\n\nI love you, today and every level after."
+};
+document.getElementById('n1').textContent=CONFIG.p1;document.getElementById('n2').textContent=CONFIG.p2;
+document.querySelectorAll('.n1').forEach(e=>e.textContent=CONFIG.p1);
+document.querySelectorAll('.n2').forEach(e=>e.textContent=CONFIG.p2);
+
+const MAP=[
+"###########D####",
+"#..............#",
+"#.####.##.####.#",
+"#..............#",
+"#..............#",
+"#.####.##.####.#",
+"#..............#",
+"#..............#",
+"#.####.##.#....#",
+"#..............#",
+"################"];
+const T=40,STEP=.2,ROWS=11;
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const door={x:11,y:0,open:0},swA={x:9,y:1},swB={x:13,y:1},key={x:14,y:9,got:false};
+// moving walls: slide between (x0,y0) and (x1,y1)
+const WALLS=[
+ {x0:2,y0:3,x1:6,y1:3,sp:1.7,ph:0},{x0:8,y0:3,x1:8,y1:4,sp:2.8,ph:0},{x0:10,y0:4,x1:14,y1:4,sp:1.8,ph:2},
+ {x0:4,y0:6,x1:4,y1:7,sp:3,ph:1},{x0:5,y0:7,x1:12,y1:7,sp:1.4,ph:0},{x0:13,y0:6,x1:13,y1:7,sp:2.6,ph:3},
+ // key room guards (rows 8-9, cols 11-14)
+ {x0:11,y0:9,x1:14,y1:9,sp:1.9,ph:1},{x0:12,y0:8,x1:12,y1:9,sp:3,ph:0}];
+const wp=w=>{const s=.5+.5*Math.sin(time*w.sp+w.ph);return{x:w.x0+(w.x1-w.x0)*s,y:w.y0+(w.y1-w.y0)*s}};
+const blocked=(x,y)=>WALLS.some(w=>{const p=wp(w);return Math.abs(p.x-x)<.9&&Math.abs(p.y-y)<.9});
+const cap=document.getElementById('cap');
+let phase=0,hold=0,last=0,time=0,shake=0,flash=0,safe=0,hintT=0,pressA=false,pressB=false,entering=false;
+const held=new Set(),after=(ms,f)=>setTimeout(f,ms);
+
+function walk(x,y){const c=MAP[y]&&MAP[y][x];if(!c||c==='#')return false;if(c==='D')return door.open>=1;return true}
+function bfs(a,b){const k=(x,y)=>x+','+y,prev={[k(a.x,a.y)]:null},q=[[a.x,a.y]];
+  while(q.length){const[x,y]=q.shift();if(x===b.x&&y===b.y)break;
+    for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy;if(walk(nx,ny)&&!(k(nx,ny)in prev)){prev[k(nx,ny)]=[x,y];q.push([nx,ny])}}}
+  const path=[];let c=[b.x,b.y];if(!(k(b.x,b.y)in prev))return path;
+  while(prev[k(c[0],c[1])]){path.unshift({x:c[0],y:c[1]});c=prev[k(c[0],c[1])]}return path}
+
+const mk=(x,y)=>({x,y,px:x,py:y,ox:x,oy:y,q:[],mv:null,t:0,face:1});
+const p1=mk(11,1),p2=mk(1,1); // P1 waits at the gate, P2 is yours
+const idle=e=>!e.mv&&!e.q.length;
+function step(e,dt){
+  if(e.mv){e.t+=dt/STEP;if(e.t>=1){e.x=e.mv.x;e.y=e.mv.y;e.mv=null}else{e.px=e.ox+(e.mv.x-e.ox)*e.t;e.py=e.oy+(e.mv.y-e.oy)*e.t}}
+  if(!e.mv&&e.q.length){const n=e.q.shift();e.ox=e.x;e.oy=e.y;e.mv=n;e.t=0;if(n.x!==e.x)e.face=n.x>e.x?1:-1}
+  if(!e.mv){e.px=e.x;e.py=e.y}
+}
+let typer;function say(t){clearInterval(typer);let i=0;cap.textContent='';typer=setInterval(()=>{cap.textContent=t.slice(0,++i);if(i>=t.length)clearInterval(typer)},28)}
+function hit(){p2.q=[];p2.mv=null;p2.x=p2.px=p2.ox=1;p2.y=p2.py=p2.oy=1;safe=1.2;flash=.5;
+  say(key.got?"Ouch! Back to the start. You still have the key.":"Ouch! Those walls are sneaky. Try again.")}
+
+function update(dt){
+  step(p2,dt);step(p1,dt);shake=Math.max(0,shake-dt);flash=Math.max(0,flash-dt);safe=Math.max(0,safe-dt);
+  if(phase>=4)door.open=Math.min(1,door.open+dt);
+  if(phase<4&&!p1.mv)p1.face=p2.px>=p1.px?1:-1;
+  if(phase===1||phase===3){
+    if(idle(p2)){const d=[...held][0];if(d){const n={x:p2.x+(d==='r')-(d==='l'),y:p2.y+(d==='d')-(d==='u')};if(walk(n.x,n.y)&&!blocked(n.x,n.y))p2.q.push(n)}}
+    if(!safe&&WALLS.some(w=>{const p=wp(w);return Math.abs(p.x-p2.px)<.72&&Math.abs(p.y-p2.py)<.72}))hit();
+  }
+  if(phase===1&&!key.got&&idle(p2)&&p2.x===key.x&&p2.y===key.y){key.got=true;say("You found the key! Now bring it to the gate.")}
+  if(phase===1&&idle(p2)&&Math.abs(p2.x-p1.x)+Math.abs(p2.y-p1.y)<=1){
+    if(key.got){phase=3;p1.q=bfs(p1,swA);say("The key fits! Two switches. Stand on them at the same time.")}
+    else if(time>hintT){hintT=time+8;say("The gate is locked. There must be a key somewhere in the maze...")}
+  }
+  if(phase===3){
+    pressA=idle(p1)&&p1.x===swA.x&&p1.y===swA.y;pressB=idle(p2)&&p2.x===swB.x&&p2.y===swB.y;
+    if(pressA&&pressB){hold+=dt;if(hold>.8)unlock()}else hold=0;
+  }
+  if(phase===4&&entering&&idle(p1)&&idle(p2)&&p1.y===0){phase=5;after(700,final)}
+}
+function unlock(){phase=4;document.getElementById('pad').classList.remove('on');say("Click. The door opens.");
+  after(1400,()=>{p2.q=bfs(p2,{x:11,y:0});after(500,()=>{p1.q=bfs(p1,{x:11,y:0});entering=true})})}
+function final(){const f=document.getElementById('fin');f.classList.add('on');
+  for(let i=0;i<22;i++){const h=document.createElement('span');h.className='fh';h.textContent='♥';h.style.left=Math.random()*100+'%';h.style.fontSize=(10+Math.random()*26)+'px';h.style.animationDuration=(6+Math.random()*8)+'s';h.style.animationDelay=(Math.random()*8)+'s';f.appendChild(h)}
+  const m=document.getElementById('msg'),t=CONFIG.final;let i=0;after(1800,()=>{const iv=setInterval(()=>{m.textContent=t.slice(0,++i);if(i>=t.length){clearInterval(iv);m.textContent=t+' ❤️';f.classList.add('done')}},55)})}
+
+// ---- drawing ----
+const PINK='#ff6b9d',BLUE='#7cc7ff';
+function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+function drawMap(){
+  for(let y=0;y<ROWS;y++)for(let x=0;x<16;x++){const c=MAP[y][x],px=x*T,py=y*T;
+    if(c==='#'){ctx.fillStyle='#4a1f45';ctx.fillRect(px,py,T,T);ctx.fillStyle='#6d2f63';ctx.fillRect(px,py,T,5);ctx.fillStyle='#34142f';ctx.fillRect(px,py+T-5,T,5)}
+    else{ctx.fillStyle=(x+y)%2?'#2b1233':'#331539';ctx.fillRect(px,py,T,T)}}
+}
+function drawWalls(){
+  ctx.setLineDash([4,6]);ctx.strokeStyle='rgba(255,107,157,.18)';ctx.lineWidth=2;
+  WALLS.forEach(w=>{ctx.beginPath();ctx.moveTo(w.x0*T+20,w.y0*T+20);ctx.lineTo(w.x1*T+20,w.y1*T+20);ctx.stroke()});ctx.setLineDash([]);
+  WALLS.forEach(w=>{const p=wp(w),x=p.x*T,y=p.y*T;
+    ctx.fillStyle='#34142f';ctx.fillRect(x+2,y+4,T-4,T-4);ctx.fillStyle='#9a4a93';ctx.fillRect(x+1,y+1,T-2,T-6);
+    ctx.fillStyle='#c26bb8';ctx.fillRect(x+1,y+1,T-2,4);ctx.fillStyle='#6d2f63';ctx.fillRect(x+8,y+12,T-16,8);})
+}
+function drawKey(){if(key.got)return;const x=key.x*T+20,y=key.y*T+20+Math.sin(time*3)*3;
+  ctx.shadowColor='#ffd66b';ctx.shadowBlur=16;ctx.fillStyle='#ffd66b';ctx.beginPath();ctx.arc(x-7,y,6,0,7);ctx.fill();
+  ctx.fillStyle='#331539';ctx.beginPath();ctx.arc(x-7,y,2.5,0,7);ctx.fill();
+  ctx.fillStyle='#ffd66b';ctx.fillRect(x-2,y-2,14,4);ctx.fillRect(x+7,y,3,6);ctx.fillRect(x+3,y,3,4);ctx.shadowBlur=0}
+function drawSwitch(s,col,pressed,label){const x=s.x*T,y=s.y*T;
+  if(phase===3&&!pressed){ctx.strokeStyle=col;ctx.globalAlpha=.4+.4*Math.sin(time*5);ctx.lineWidth=2;ctx.strokeRect(x+3,y+3,T-6,T-6);ctx.globalAlpha=1}
+  ctx.fillStyle=pressed?col:'#4b2152';rr(x+6,y+6,T-12,T-12,5);
+  ctx.fillStyle=pressed?'#fff':col;ctx.font='10px "Press Start 2P",monospace';ctx.textAlign='center';ctx.fillText(label,x+T/2,y+T/2+3)}
+function drawDoor(){const x=door.x*T,y=0,o=door.open;
+  if(o>0){ctx.fillStyle='#ffd9a8';ctx.fillRect(x,y,T,T);
+    const g=ctx.createRadialGradient(x+20,40,2,x+20,40,90);g.addColorStop(0,'rgba(255,217,168,'+.45*o+')');g.addColorStop(1,'rgba(255,217,168,0)');ctx.fillStyle=g;ctx.fillRect(x-70,0,180,140)}
+  const w=T*(1-o),sx=Math.sin(time*60)*shake*4;
+  if(w>0){ctx.fillStyle='#c99a5b';ctx.fillRect(x+sx,y,w,T);ctx.fillStyle='#8a6232';ctx.fillRect(x+sx,y,w,4);
+    if(o===0){ctx.fillStyle='#ffe29a';rr(x+13+sx,y+17,14,11,2);ctx.strokeStyle='#ffe29a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x+20+sx,y+17,5,Math.PI,0);ctx.stroke()}}}
+function drawChar(e,c,label,me){const x=e.px*T,y=e.py*T,bob=e.mv?Math.sin(time*20)*2:Math.sin(time*3);
+  ctx.globalAlpha=(me&&safe>0&&Math.floor(time*12)%2)?.35:1;
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(x+20,y+34,12,5,0,0,7);ctx.fill();
+  ctx.fillStyle=c;rr(x+7,y+8+bob,26,26,7);
+  ctx.fillStyle='#2a1030';ctx.fillRect(x+13+e.face*2,y+18+bob,4,6);ctx.fillRect(x+23+e.face*2,y+18+bob,4,6);
+  ctx.font='9px "Press Start 2P",monospace';ctx.textAlign='center';ctx.fillStyle=c;ctx.fillText(label,x+20,y+4+bob);
+  if(me){ctx.fillStyle='#fff';ctx.font='10px sans-serif';ctx.fillText('♥',x+33,y+12+bob);if(key.got&&phase<4)ctx.fillText('🔑',x+6,y+12+bob)}
+  ctx.globalAlpha=1}
+function beam(s,col,on){if(!on)return;ctx.strokeStyle=col;ctx.globalAlpha=.5+.3*Math.sin(time*10);ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(s.x*T+20,s.y*T+20);ctx.lineTo(door.x*T+20,T-4);ctx.stroke();ctx.globalAlpha=1}
+function draw(){
+  drawMap();drawDoor();drawKey();
+  drawSwitch(swA,BLUE,pressA,'1');drawSwitch(swB,PINK,pressB,'2');
+  beam(swA,BLUE,pressA);beam(swB,PINK,pressB);
+  drawWalls();
+  [[p1,BLUE,'P1',false],[p2,PINK,'P2',true]].sort((a,b)=>a[0].py-b[0].py).forEach(a=>drawChar(...a));
+  if(flash>0){ctx.fillStyle='rgba(255,80,120,'+flash*.5+')';ctx.fillRect(0,0,640,440)}
+}
+function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;time+=dt;update(dt);draw();requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+
+// ---- input ----
+const km={ArrowUp:'u',w:'u',ArrowDown:'d',s:'d',ArrowLeft:'l',a:'l',ArrowRight:'r',d:'r'};
+addEventListener('keydown',e=>{const d=km[e.key];if(d){e.preventDefault();held.add(d)}});
+addEventListener('keyup',e=>{const d=km[e.key];if(d)held.delete(d)});
+document.querySelectorAll('#pad button').forEach(b=>{const d=b.dataset.d;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();held.add(d)});
+  ['pointerup','pointerleave','pointercancel'].forEach(v=>b.addEventListener(v,()=>held.delete(d)))});
+let sw=null;const clr=()=>['u','d','l','r'].forEach(d=>held.delete(d));
+cv.addEventListener('pointerdown',e=>{sw={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(!sw)return;const dx=e.clientX-sw.x,dy=e.clientY-sw.y;clr();if(Math.hypot(dx,dy)>16)held.add(Math.abs(dx)>Math.abs(dy)?(dx>0?'r':'l'):(dy>0?'d':'u'))});
+['pointerup','pointercancel'].forEach(v=>cv.addEventListener(v,()=>{sw=null;clr()}));
+document.getElementById('start').onclick=()=>{const t=document.getElementById('title');t.style.opacity=0;t.style.pointerEvents='none';
+  phase=1;document.getElementById('pad').classList.add('on');say("Tissss is waiting at the gate. Find the key hidden in the maze.")};
+</script>
+</body>
+</html>
